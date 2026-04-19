@@ -62,69 +62,30 @@
 
     <h2>🚇 Bangalore Metro Last Mile</h2>
 
-    <!-- ENTER LINE -->
+    <!-- LINE -->
     <select id="line">
         <option value="">Select Line</option>
         <option>Purple</option>
         <option>Green</option>
     </select>
 
-    <!-- ENTER STATION -->
+    <!-- STATION -->
     <select id="station">
         <option value="">Select Station</option>
-
-        <option>Whitefield (Kadugodi)</option>
         <option>Indiranagar</option>
         <option>MG Road</option>
         <option>Majestic</option>
-        <option>Vijayanagar</option>
-        <option>Kengeri</option>
-        <option>KR Market</option>
-        <option>Yeshwanthpur</option>
-        <option>Banashankari</option>
-        <option>Jayanagar</option><option>Whitefield (Kadugodi)</option>
-        <option>Hopefarm Channasandra</option>
-        <option>KR Puram</option>
-        <option>Indiranagar</option>
-        <option>MG Road</option>
-        <option>Trinity</option>
         <option>Cubbon Park</option>
         <option>Vidhana Soudha</option>
-        <option>Majestic</option>
-        <option>KSR City Railway Station</option>
-        <option>Magadi Road</option>
-        <option>Vijayanagar</option>
-        <option>Attiguppe</option>
-        <option>Mysuru Road</option>
-        <option>Kengeri</option>
-        <option>Nayandahalli</option>
-        <option>Rajajinagar</option>
-        <option>Peenya</option>
-        <option>Dasarahalli</option>
-        <option>Nagasandra</option>
-        <option>Yeshwanthpur</option>
-        <option>Sandal Soap Factory</option>
-        <option>Mahalakshmi</option>
-        <option>Srirampura</option>
-        <option>Mantri Square</option>
-        <option>Chickpet</option>
-        <option>KR Market</option>
-        <option>National College</option>
-        <option>Lalbagh</option>
-        <option>South End Circle</option>
-        <option>Jayanagar</option>
-        <option>Banashankari</option>
-        <option>Yelachenahalli</option>
-        <option>Silk Institute</option> 
-
     </select>
 
-    <!-- ENTER DESTINATION -->
-    <input type="text" id="destination" placeholder="Enter Destination (Shop / Mall / Area)">
+    <!-- DESTINATION -->
+    <input type="text" id="destination" placeholder="Enter Destination">
 
+    <!-- BUTTON -->
     <button onclick="getPlaces()">Find Nearby Places</button>
 
-    <!-- AUTO ICON -->
+    <!-- AUTO -->
     <div id="autoBox">
         <img src="https://cdn-icons-png.flaticon.com/512/1995/1995470.png">
         <p>🚕 Auto Available near metro</p>
@@ -137,32 +98,48 @@
 
 <script>
 
-function getPlaces() {
+async function getPlaces() {
 
     let line = document.getElementById("line").value;
-    let station = document.getElementById("station").value.toLowerCase();
+    let station = document.getElementById("station").value;
     let destination = document.getElementById("destination").value;
+
+    if (!station || !destination) {
+        alert("Please fill all fields");
+        return;
+    }
 
     document.getElementById("autoBox").style.display = "block";
 
-    fetch(`http://127.0.0.1:5000/get_places?station=${station}`)
-    .then(res => res.json())
-    .then(data => {
+    try {
+        const res = await fetch(
+            `http://127.0.0.1:5000/get_places?station=${encodeURIComponent(station)}&destination=${encodeURIComponent(destination)}`
+        );
+
+        const data = await res.json();
+
+        // 🔴 HANDLE ERROR FROM BACKEND
+        if (data.error) {
+            document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
+            return;
+        }
 
         let html = `
             <h3>🚇 Line: ${line}</h3>
             <h3>📍 Station: ${data.station}</h3>
-            <h3>🎯 Destination: ${destination}</h3>
-             <hr>
+            <h3>🎯 Destination: ${data.destination}</h3>
 
-    <h4>🚕 Transport Info:</h4>
-    <p>⏱ Waiting Time: ${data.bus_waiting_time} </p>
-    <p>🚌 BMTCL Bus Available: ${data.auto==  "Yes" ?"Yes": "No"}</p>
-    <p>🚶 Walking Time: ${data.walking_time} </p>
+            <p>🚪 <b>Recommended Exit:</b> ${data.exit || "Not available"}</p>
 
-    <h3>💡 Suggestion: ${data.suggestion}</h3>
+            <hr>
 
-    <hr>
+            <h4>🚕 Transport Info:</h4>
+            <p>📏 Distance: ${data.distance || "N/A"}</p>
+            <p>🚶 Walking Time: ${data.walking_time || "N/A"}</p>
+            <p>🚗 Vehicle Time: ${data.vehicle_time || "N/A"}</p>
+            <p>⏱ Waiting Time: ${data.waiting_time || "N/A"}</p>
+
+            <h3>💡 Suggestion: ${data.suggestion || "N/A"}</h3>
 
             <hr>
 
@@ -170,15 +147,23 @@ function getPlaces() {
             <ul>
         `;
 
-        data.nearby_places.forEach(p => {
-            html += `<li>🏬 ${p}</li>`;
-        });
+        if (data.nearby_places && data.nearby_places.length > 0) {
+            data.nearby_places.forEach(p => {
+                html += `<li>🏬 ${p}</li>`;
+            });
+        } else {
+            html += `<li>No data available</li>`;
+        }
 
         html += "</ul>";
 
         document.getElementById("result").innerHTML = html;
-    });
 
+    } catch (err) {
+        console.log(err);
+        alert("Backend error (check terminal)");
+        
+    }
 }
 
 </script>
