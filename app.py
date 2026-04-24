@@ -1,16 +1,18 @@
 from flask import Flask
 from flask_cors import CORS
+
 from routes.api import api
 
 app = Flask(__name__)
 CORS(app)
 
-# Register API
 app.register_blueprint(api)
 
-@app.route('/')
+
+@app.route("/")
 def home():
-    return "Backend is running 🚀"
+    return "Backend is running"
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

@@ -1,0 +1,24 @@
+{
+  "station": "Indiranagar",
+  "destination": "Toit",
+  "options": [
+    {
+      "exit": "Exit A",
+      "walking_distance": "0.12 km",
+      "walking_time": "1 min",
+      "vehicle_distance": "0.11 km",
+      "vehicle_time": "1 min",
+      "waiting_time": "1 min",
+      "suggestion": "Walk \ud83d\udeb6"
+    },
+    {
+      "exit": "Exit C",
+      "walking_distance": "0.44 km",
+      "walking_time": "5 mins",
+      "vehicle_distance": "0.43 km",
+      "vehicle_time": "1 min",
+      "waiting_time": "1 min",
+      "suggestion": "Walk \ud83d\udeb6"
+    }
+  ]
+}

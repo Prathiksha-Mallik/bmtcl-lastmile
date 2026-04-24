@@ -1,172 +1,448 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Metro Last Mile System</title>
 
+<head>
+    <title>Results</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        html,
         body {
             margin: 0;
-            font-family: Arial;
-            background: url("result.png") no-repeat center center;
-            background-size: cover;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            background: url("result.png") no-repeat center center fixed;
+            background-size: cover;
+            box-sizing: border-box;
+            padding-bottom: 60px;
         }
 
-        .box {
-            background: rgba(255,255,255,0.95);
-            width: 450px;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        input, select, button {
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
+            max-width: 1100px;
+            margin: auto;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        button {
-            background: #2563eb;
+        h1 {
+            text-align: center;
+            color: #1d4ed8;
+            margin-top: 0;
+            font-size: 2.5em;
+        }
+
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        #options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .option-box {
+            border-radius: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f9f9f9, #eef3ff);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            flex: 1 1 45%;
+            box-sizing: border-box;
+            min-width: 340px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .option-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .title {
+            font-weight: bold;
+            color: #ff7a00;
+        }
+
+        .option-box h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .exit-map {
+            height: 220px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .nav-btn {
+            background: #22c55e;
             color: white;
             border: none;
+            padding: 10px;
             border-radius: 8px;
             cursor: pointer;
-        }
-
-        #autoBox {
-            display: none;
+            font-weight: bold;
             margin-top: 10px;
+            width: 100%;
         }
 
-        #autoBox img {
-            width: 60px;
+        .nav-btn:hover {
+            background: #16a34a;
         }
 
-        #result {
-            margin-top: 15px;
-            text-align: left;
-            background: #f1f5f9;
-            padding: 10px;
-            border-radius: 10px;
+        .user-location-pulse {
+            width: 15px;
+            height: 15px;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 rgba(59, 130, 246, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
     </style>
 </head>
 
 <body>
 
-<div class="box">
+    <div class="main-container">
 
-    <h2>🚇 Bangalore Metro Last Mile</h2>
+        <h1>Travel Details</h1>
 
-    <!-- LINE -->
-    <select id="line">
-        <option value="">Select Line</option>
-        <option>Purple</option>
-        <option>Green</option>
-    </select>
+        <div style="background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <p><b>Line:</b> <span id="line"></span></p>
+            <p><b>Station:</b> <span id="station"></span></p>
+            <p><b>Destination:</b> <span id="destination"></span></p>
+        </div>
 
-    <!-- STATION -->
-    <select id="station">
-        <option value="">Select Station</option>
-        <option>Indiranagar</option>
-        <option>MG Road</option>
-        <option>Majestic</option>
-        <option>Cubbon Park</option>
-        <option>Vidhana Soudha</option>
-    </select>
+        <p id="loading">Loading details...</p>
 
-    <!-- DESTINATION -->
-    <input type="text" id="destination" placeholder="Enter Destination">
+        <div id="map" style="height: 300px; margin-bottom: 25px; border-radius: 15px; display: none; border: 2px solid #1d4ed8;"></div>
 
-    <!-- BUTTON -->
-    <button onclick="getPlaces()">Find Nearby Places</button>
+        <div id="options-container" style="display:none;">
+        </div>
 
-    <!-- AUTO -->
-    <div id="autoBox">
-        <img src="https://cdn-icons-png.flaticon.com/512/1995/1995470.png">
-        <p>🚕 Auto Available near metro</p>
+        <div id="voice-assistant" style="text-align: center; margin-top: 30px; display: none; padding: 20px; border-top: 2px solid #eee;">
+            <h3 style="color: #1d4ed8;">🗣️ Voice Assistant</h3>
+            <select id="voice-lang" style="padding: 8px; border-radius: 5px; margin-right: 10px;">
+                <option value="en-IN">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="kn-IN">Kannada</option>
+            </select>
+            <button onclick="speakResults()" style="padding: 10px 20px; background: #ff7a00; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🔊 Speak Result</button>
+        </div>
+
+        <p id="error"></p>
+
     </div>
 
-    <!-- RESULT -->
-    <div id="result"></div>
+    <script>
+        // Ensure voices are loaded asynchronously
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
 
-</div>
+        let line = localStorage.getItem("metroLine");
+        let station = localStorage.getItem("station");
+        let destination = localStorage.getItem("destination");
 
-<script>
+        document.getElementById("line").innerText = line || "Not selected";
+        document.getElementById("station").innerText = station || "Not selected";
+        document.getElementById("destination").innerText = destination || "Not entered";
 
-async function getPlaces() {
+        async function loadResult() {
+            if (!station || !destination) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("error").innerText =
+                    "Please select a station and destination first.";
+                return;
+            }
 
-    let line = document.getElementById("line").value;
-    let station = document.getElementById("station").value;
-    let destination = document.getElementById("destination").value;
+            try {
+                const params = new URLSearchParams({
+                    station: station,
+                    destination: destination
+                });
 
-    if (!station || !destination) {
-        alert("Please fill all fields");
-        return;
-    }
+                const res = await fetch(`http://127.0.0.1:5001/get_places?${params.toString()}`);
+                const data = await res.json();
 
-    document.getElementById("autoBox").style.display = "block";
+                document.getElementById("loading").style.display = "none";
 
-    try {
-        const res = await fetch(
-            `http://127.0.0.1:5000/get_places?station=${encodeURIComponent(station)}&destination=${encodeURIComponent(destination)}`
-        );
+                if (!res.ok || data.error) {
+                    document.getElementById("error").innerText =
+                        data.error || "Unable to calculate route.";
+                    return;
+                }
 
-        const data = await res.json();
+                // Initialize Main Map
+                if (data.station_coords && data.destination_coords) {
+                    document.getElementById("map").style.display = "block";
+                    const mainMap = L.map('map').setView([data.station_coords[1], data.station_coords[0]], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(mainMap);
 
-        // 🔴 HANDLE ERROR FROM BACKEND
-        if (data.error) {
-            document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
-            return;
+                    const stationMarker = L.marker([data.station_coords[1], data.station_coords[0]]).addTo(mainMap)
+                        .bindPopup(`<b>${data.station} Station</b>`);
+                    const destMarker = L.marker([data.destination_coords[1], data.destination_coords[0]]).addTo(mainMap)
+                        .bindPopup(`<b>${data.destination}</b>`);
+
+                    const group = new L.featureGroup([stationMarker, destMarker]);
+                    mainMap.fitBounds(group.getBounds().pad(0.1));
+                }
+
+                const container = document.getElementById("options-container");
+                if (data.options && data.options.length > 0) {
+                    container.style.display = "flex";
+                    let html = "";
+                    const showOptionLabel = data.options.length > 1;
+                    data.options.forEach((opt, index) => {
+                        const labelText = showOptionLabel ? `<span class="title">Option ${index + 1}: </span>` : "";
+                        html += `
+                <div class="option-box">
+                    <h3>${labelText}${opt.exit} (${opt.landmark})</h3>
+                    <p>&#128207; <b>Walk Dist:</b> <span>${opt.walking_distance}</span></p>
+                    <p>&#128694; <b>Walk Time:</b> <span>${opt.walking_time}</span></p>
+                    <p>&#128207; <b>Drive Dist:</b> <span>${opt.vehicle_distance}</span></p>
+                    <p>&#128661; <b>Drive Time:</b> <span>${opt.vehicle_time}</span></p>
+                    <p>&#128666; <b>${opt.auto_availability}</b></p>
+                    <h2 style="color: green; margin: 10px 0;">&#9989; <span>${opt.suggestion}</span></h2>
+                    <div id="map-exit-${index}" class="exit-map"></div>
+                    <button class="nav-btn" onclick="startNavigation(${index})">📍 Start Live Navigation</button>
+                </div>
+                `;
+                    });
+                    container.innerHTML = html;
+                    document.getElementById("voice-assistant").style.display = "block";
+                    window.lastResultData = data;
+
+                    // Initialize maps array
+                    window.exitMaps = [];
+                    window.exitUserMarkers = [];
+
+                    // Initialize per-exit maps
+                    data.options.forEach((opt, index) => {
+                        const exitMap = L.map(`map-exit-${index}`, { zoomControl: true }).setView([data.station_coords[1], data.station_coords[0]], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(exitMap);
+
+                        if (opt.route_geometry) {
+                            const routeLayer = L.geoJSON(opt.route_geometry, {
+                                style: { color: opt.suggestion.includes("Walk") ? '#2563eb' : '#d97706', weight: 6 }
+                            }).addTo(exitMap);
+                            exitMap.fitBounds(routeLayer.getBounds().pad(0.2));
+                        }
+
+                        L.marker([data.station_coords[1], data.station_coords[0]]).addTo(exitMap).bindPopup("Station Exit");
+                        L.marker([data.destination_coords[1], data.destination_coords[0]]).addTo(exitMap).bindPopup("Destination");
+                        
+                        window.exitMaps[index] = exitMap;
+                    });
+                } else {
+                    container.innerHTML = "";
+                    document.getElementById("error").innerText = "No route options found.";
+                }
+            }
+            catch (err) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("error").innerText =
+                    "Backend not running or connection failed.";
+            }
         }
 
-        let html = `
-            <h3>🚇 Line: ${line}</h3>
-            <h3>📍 Station: ${data.station}</h3>
-            <h3>🎯 Destination: ${data.destination}</h3>
+        function generateSpeechText(opt, langCode) {
+            let dist = opt.walking_distance;
+            let time = opt.walking_time;
+            let v_time = opt.vehicle_time;
+            let suggestion = opt.suggestion;
+            let landmark = opt.landmark;
 
-            <p>🚪 <b>Recommended Exit:</b> ${data.exit || "Not available"}</p>
+            if (langCode === "kn-IN") {
+                dist = dist.replace("km", "ಕಿಲೋಮೀಟರ್");
+                time = time.replace("mins", "ನಿಮಿಷಗಳು").replace("min", "ನಿಮಿಷ");
+                v_time = v_time.replace("mins", "ನಿಮಿಷಗಳು").replace("min", "ನಿಮಿಷ");
+                
+                let modeTxt = "ನಡಿಗೆ";
+                if (suggestion.includes("Auto")) {
+                    modeTxt = suggestion.includes("Walk") ? "ನಡಿಗೆ ಅಥವಾ ಆಟೋ" : "ಆಟೋ";
+                }
 
-            <hr>
+                landmark = landmark.replace("near", "ಹತ್ತಿರ")
+                                   .replace("road", "ರಸ್ತೆ")
+                                   .replace("gate", "ಗೇಟ್")
+                                   .replace("stop", "ನಿಲ್ದಾಣ");
 
-            <h4>🚕 Transport Info:</h4>
-            <p>📏 Distance: ${data.distance || "N/A"}</p>
-            <p>🚶 Walking Time: ${data.walking_time || "N/A"}</p>
-            <p>🚗 Vehicle Time: ${data.vehicle_time || "N/A"}</p>
-            <p>⏱ Waiting Time: ${data.waiting_time || "N/A"}</p>
+                return `ಎಕ್ಸಿಟ್ ${opt.exit}, ${landmark} ಹತ್ತಿರ ಇದೆ. 
+                ನಡೆದು ಹೋಗುವ ದೂರ ${dist} ಮತ್ತು ಸಮಯ ${time}. 
+                ವಾಹನದಿಂದ ಹೋಗಲು ಸಮಯ ${v_time}. 
+                ನಿಮ್ಮಿಗೆ ಉತ್ತಮ ಆಯ್ಕೆ ${modeTxt}.`;
+            }
 
-            <h3>💡 Suggestion: ${data.suggestion || "N/A"}</h3>
+            else if (langCode === "hi-IN") {
+                dist = dist.replace("km", "किलोमीटर");
+                time = time.replace("mins", "मिनट").replace("min", "मिनट");
+                v_time = v_time.replace("mins", "मिनट").replace("min", "मिनट");
 
-            <hr>
+                let modeTxt = "पैदल चलना";
+                if (suggestion.includes("Auto")) {
+                    modeTxt = suggestion.includes("Walk") ? "पैदल या ऑटो" : "ऑटो";
+                }
 
-            <h4>🛍️ Nearby Places:</h4>
-            <ul>
-        `;
+                return `निकास ${opt.exit}, ${landmark} के पास है।
+                पैदल दूरी ${dist} और समय ${time} है।
+                वाहन से समय ${v_time} लगेगा।
+                सुझाव: ${modeTxt}.`;
+            }
 
-        if (data.nearby_places && data.nearby_places.length > 0) {
-            data.nearby_places.forEach(p => {
-                html += `<li>🏬 ${p}</li>`;
+            else {
+                return `Exit ${opt.exit} near ${landmark}.
+                Walking distance is ${dist} and takes ${time}.
+                Vehicle time is ${v_time}.
+                Suggested option is ${suggestion.replace(/[^\w\s]/gi, '')}.`;
+            }
+        }
+
+        function speakResults() {
+            if (!window.lastResultData || !window.lastResultData.options) return;
+
+            const langCode = document.getElementById("voice-lang").value;
+            let combinedText = "";
+
+            window.lastResultData.options.forEach((opt, index) => {
+                if (window.lastResultData.options.length > 1) {
+                    const prefix = langCode === "kn-IN" ? `ಆಯ್ಕೆ ${index + 1}. ` : 
+                                   langCode === "hi-IN" ? `विकल्प ${index + 1}. ` : 
+                                   `Option ${index + 1}. `;
+                    combinedText += prefix;
+                }
+                combinedText += generateSpeechText(opt, langCode);
             });
-        } else {
-            html += `<li>No data available</li>`;
+
+            if (langCode === "kn-IN") {
+                // Use Google Translate TTS for high-quality Kannada speech
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(combinedText)}&tl=kn&client=tw-ob`;
+                const audio = new Audio(url);
+                audio.play().catch(err => {
+                    console.warn("Google TTS failed, falling back to browser speech:", err);
+                    browserSpeak(combinedText, langCode);
+                });
+            } else {
+                browserSpeak(combinedText, langCode);
+            }
         }
 
-        html += "</ul>";
+        function browserSpeak(text, langCode) {
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = langCode;
 
-        document.getElementById("result").innerHTML = html;
+            const voices = window.speechSynthesis.getVoices();
+            let selectedVoice = voices.find(v => v.lang === langCode);
 
-    } catch (err) {
-        console.log(err);
-        alert("Backend error (check terminal)");
-        
-    }
-}
+            if (!selectedVoice) {
+                selectedVoice = voices.find(v => v.lang.startsWith(langCode.split("-")[0]));
+            }
 
-</script>
+            if (selectedVoice) {
+                msg.voice = selectedVoice;
+            }
+
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startNavigation(index) {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+
+            const map = window.exitMaps[index];
+            if (!map) return;
+
+            alert("Live tracking started. The map will update as you move.");
+
+            // Clear existing tracking if any
+            if (window.navWatchId) navigator.geolocation.clearWatch(window.navWatchId);
+
+            window.exitAccuracyCircles = window.exitAccuracyCircles || [];
+
+            window.navWatchId = navigator.geolocation.watchPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                if (window.exitUserMarkers[index]) {
+                    window.exitUserMarkers[index].setLatLng([lat, lon]);
+                    window.exitAccuracyCircles[index].setLatLng([lat, lon]);
+                    window.exitAccuracyCircles[index].setRadius(accuracy);
+                } else {
+                    // Accuracy circle
+                    window.exitAccuracyCircles[index] = L.circle([lat, lon], {
+                        radius: accuracy,
+                        color: '#3b82f6',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.15,
+                        weight: 1
+                    }).addTo(map);
+
+                    // User marker
+                    window.exitUserMarkers[index] = L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'user-location-pulse',
+                            html: ''
+                        })
+                    }).addTo(map).bindPopup("You are here");
+                }
+
+                map.flyTo([lat, lon], 17, {
+                    animate: true,
+                    duration: 1
+                });
+            }, (err) => {
+                console.warn("ERROR(" + err.code + "): " + err.message);
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        }
+
+        loadResult();
+
+    </script>
 
 </body>
+
 </html>

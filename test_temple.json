@@ -1,0 +1,24 @@
+{
+  "station": "Indiranagar",
+  "destination": "Shivoham shiva temple",
+  "options": [
+    {
+      "exit": "Exit B",
+      "walking_distance": "3.94 km",
+      "walking_time": "47 mins",
+      "vehicle_distance": "4.52 km",
+      "vehicle_time": "6 mins",
+      "waiting_time": "2 mins",
+      "suggestion": "Auto / Cab \ud83d\ude95"
+    },
+    {
+      "exit": "Exit C",
+      "walking_distance": "3.85 km",
+      "walking_time": "46 mins",
+      "vehicle_distance": "4.63 km",
+      "vehicle_time": "6 mins",
+      "waiting_time": "2 mins",
+      "suggestion": "Auto / Cab \ud83d\ude95"
+    }
+  ]
+}
