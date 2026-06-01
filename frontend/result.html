@@ -229,19 +229,55 @@
                     const showOptionLabel = data.options.length > 1;
                     data.options.forEach((opt, index) => {
                         const labelText = showOptionLabel ? `<span class="title">Option ${index + 1}: </span>` : "";
+                        const busInfo = opt.bus_info;
+                        let busListHtml = "";
+                        if (busInfo) {
+                            if (busInfo.buses && busInfo.buses.length > 0) {
+                                busInfo.buses.forEach(bus => {
+                                    busListHtml += `
+                                    <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                        <span>🚌</span> <b>Bus ${bus.number}:</b> Next at ${bus.departure}
+                                    </p>`;
+                                });
+                            } else {
+                                busListHtml = `
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>🚌</span> <b>Bus info:</b> ${busInfo.message || 'Not available'}
+                                </p>`;
+                            }
+                        }
+
                         html += `
-                <div class="option-box">
-                    <h3>${labelText}${opt.exit} (${opt.landmark})</h3>
-                    <p>&#128207; <b>Walk Dist:</b> <span>${opt.walking_distance}</span></p>
-                    <p>&#128694; <b>Walk Time:</b> <span>${opt.walking_time}</span></p>
-                    <p>&#128207; <b>Drive Dist:</b> <span>${opt.vehicle_distance}</span></p>
-                    <p>&#128661; <b>Drive Time:</b> <span>${opt.vehicle_time}</span></p>
-                    <p>&#128666; <b>${opt.auto_availability}</b></p>
-                    <h2 style="color: green; margin: 10px 0;">&#9989; <span>${opt.suggestion}</span></h2>
-                    <div id="map-exit-${index}" class="exit-map"></div>
-                    <button class="nav-btn" onclick="startNavigation(${index})">📍 Start Live Navigation</button>
-                </div>
-                `;
+                        <div class="option-box">
+                            <h3>${labelText}${opt.exit} (${opt.landmark})</h3>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>📐</span> <b>Walk Dist:</b> ${opt.walking_distance}
+                                </p>
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>🏃</span> <b>Walk Time:</b> ${opt.walking_time}
+                                </p>
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>📐</span> <b>Drive Dist:</b> ${opt.vehicle_distance}
+                                </p>
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>🚕</span> <b>Drive Time:</b> ${opt.vehicle_time}
+                                </p>
+                                <p style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span>🛺</span> <b>${opt.auto_availability}</b>
+                                </p>
+                                ${busListHtml}
+                            </div>
+
+                            <h2 style="color: #16a34a; margin: 15px 0 10px 0; font-size: 22px; text-align: center;">
+                                Suggestion: ${opt.suggestion}
+                            </h2>
+
+                            <div id="map-exit-${index}" class="exit-map"></div>
+                            <button class="nav-btn" onclick="startNavigation(${index})">📍 Start Live Navigation</button>
+                        </div>
+                        `;
                     });
                     container.innerHTML = html;
                     document.getElementById("voice-assistant").style.display = "block";

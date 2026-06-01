@@ -1,0 +1,44 @@
+{
+  "station": "Indiranagar",
+  "destination": "neon market",
+  "resolved_destination": "Neon, Bangalore, KA, India",
+  "destination_provider": "OpenRouteService",
+  "destination_ambiguous": false,
+  "exit": "Exit C",
+  "exit_selection_reason": "closest geographically to destination",
+  "exit_data_verified": true,
+  "distance": "11.91 km",
+  "distance_km": 11.91,
+  "walking_distance": "9.64 km",
+  "walking_distance_km": 9.64,
+  "walking_time": "116 mins",
+  "walking_minutes": 116,
+  "vehicle_distance": "11.91 km",
+  "vehicle_distance_km": 11.91,
+  "vehicle_time": "14 mins",
+  "vehicle_minutes": 14,
+  "suggestion": "Auto",
+  "provider": "OpenRouteService",
+  "openrouteservice_ready": true,
+  "accuracy_note": "Calculated with OpenRouteService using verified station exit coordinates.",
+  "exit_options": [
+    {
+      "exit": "Exit C",
+      "auto_generated": false,
+      "walking_distance_km": 9.64,
+      "walking_minutes": 116
+    },
+    {
+      "exit": "Exit B",
+      "auto_generated": false,
+      "walking_distance_km": 9.73,
+      "walking_minutes": 117
+    },
+    {
+      "exit": "Exit A",
+      "auto_generated": false,
+      "walking_distance_km": 9.97,
+      "walking_minutes": 120
+    }
+  ]
+}
